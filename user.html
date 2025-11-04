@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CopyCat - My Profile</title>
+    
+    <link rel="stylesheet" href="css/user.css">
+</head>
+<body>
+    <header>
+        <a href="index.html" class="logo">CopyCat</a>
+        <div class="user-nav">
+            <a href="print.html"><i class="fas fa-print"></i> Print</a>
+            <a href="orders.html"><i class="fas fa-print"></i> My Orders</a>
+            <a href="payment.html"><i class="fas fa-credit-card"></i> Payment</a>
+            <div class="profile-btn">
+                <img src="assets/userr.jpg" alt="User Profile">
+                <span>Profile</span>
+            </div>
+        </div>
+    </header>
+
+        <div class="main-content">
+            <h1 class="section-title">My Profile</h1>
+            
+            <form id="profileForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="firstName">First Name</label>
+                        <input type="text" id="firstName">
+                    </div>
+                    <div class="form-group">
+                        <label for="lastName">Last Name</label>
+                        <input type="text" id="lastName">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email">
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="phone">Phone Number</label>
+                        <input type="tel" id="phone">
+                    </div>
+                    <div class="form-group">
+                        <label for="birthdate">Date of Birth</label>
+                        <input type="date" id="birthdate">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="address">Street Address</label>
+                    <input type="text" id="address">
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="city">City</label>
+                        <input type="text" id="city">
+                    </div>
+                    <div class="form-group">
+                        <label for="state">State</label>
+                        <select id="state">
+                            <option value="Philippines">Philippines</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="zip">ZIP Code</label>
+                        <input type="text" id="zip">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <button type="submit" class="btn">Save Changes</button>
+                    <button type="button" class="btn btn-secondary" style="margin-left: 0.5rem;" onclick="window.history.back();">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
+import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-database.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyA7zC2xkGU7VZu7iLnSBhv4n8EZnHrzJFw",
+    authDomain: "copycat-d3561.firebaseapp.com",
+    projectId: "copycat-d3561",
+    storageBucket: "copycat-d3561.appspot.com",
+    messagingSenderId: "201940334771",
+    appId: "1:201940334771:web:5d68712667c8a5526a58c6"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const database = getDatabase(app);
+
+// Function to get query parameters from the URL
+function getQueryParams() {
+    const params = new URLSearchParams(window.location.search);
+    return {
+        firstName: params.get('firstName'),
+        lastName: params.get('lastName'),
+        email: params.get('email'),
+        phone: params.get('phone'),
+        birthdate: params.get('birthdate'),
+        address: params.get('address'),
+        city: params.get('city'),
+        state: params.get('state'),
+        zip: params.get('zip')
+    };
+}
+
+// Pre-fill the form fields with the data from the query parameters
+const queryParams = getQueryParams();
+document.getElementById('firstName').value = queryParams.firstName || '';
+document.getElementById('lastName').value = queryParams.lastName || '';
+document.getElementById('email').value = queryParams.email || '';
+document.getElementById('phone').value = queryParams.phone || '';
+document.getElementById('birthdate').value = queryParams.birthdate || '';
+document.getElementById('address').value = queryParams.address || '';
+document.getElementById('city').value = queryParams.city || '';
+document.getElementById('state').value = queryParams.state || '';
+document.getElementById('zip').value = queryParams.zip || '';
+
+// Save changes to Firebase when the form is submitted
+document.getElementById('profileForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const userId = auth.currentUser.uid; // Get the current user ID from Firebase Authentication
+    const formData = {
+        firstName: document.getElementById('firstName').value,
+        lastName: document.getElementById('lastName').value,
+        email: document.getElementById('email').value,
+        phone: document.getElementById('phone').value,
+        birthdate: document.getElementById('birthdate').value,
+        address: document.getElementById('address').value,
+        city: document.getElementById('city').value,
+        state: document.getElementById('state').value,
+        zip: document.getElementById('zip').value
+    };
+
+    set(ref(database, 'users/' + userId), formData)
+        .then(() => {
+            alert('Profile updated successfully!');
+            window.location.href = 'usersaved.html'; // Redirect back to the profile page
+        })
+        .catch((error) => {
+            alert('Error updating profile: ' + error.message);
+        });
+});
+    </script>
+</body>
+</html>

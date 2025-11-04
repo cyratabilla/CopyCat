@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CopyCat - Document Printing Service</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Map container styles */
+        #map {
+            height: 500px;
+            width: 100%;
+            border-radius: 8px;
+            margin: 20px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            background-color: #f5f5f5;
+            position: relative;
+        }
+        
+        .map-loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 1;
+        }
+        
+        .map-container {
+            position: relative;
+        }
+        
+        .search-box {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 1000;
+            width: 300px;
+            max-width: 90%;
+        }
+        
+        .search-box input {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            font-size: 14px;
+        }
+        
+        /* Additional styles for UI elements */
+        .hidden {
+            display: none !important;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        .btn:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+        
+        .upload-area {
+            border: 2px dashed #ddd;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .upload-area:hover {
+            border-color: #007bff;
+        }
+        
+        .shop-card {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        
+        .shop-card:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .shop-card.selected {
+            border-color: #007bff;
+            background-color: #e7f3ff;
+        }
+        
+        .option-group {
+            margin: 20px 0;
+        }
+        
+        .radio-group, .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .radio-option, .checkbox-option {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .radio-option input, .checkbox-option input {
+            margin-right: 10px;
+        }
+        
+        .option-label {
+            flex-grow: 1;
+        }
+        
+        .option-price {
+            color: #28a745;
+            font-weight: bold;
+        }
+        
+        .copies-input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 100px;
+        }
+        
+        .info-window {
+            max-width: 250px;
+        }
+        
+        .info-window h3 {
+            margin-top: 0;
+        }
+        
+        .select-shop {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+            width: 100%;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .alert {
+            padding: 10px 15px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        
+        .alert-success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        
+        .visually-hidden {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            border: 0;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="print.html" class="logo">CopyCat</a>
+        <div class="user-nav">
+            <a href="print.html"><i class="fas fa-print"></i> Print</a>
+            <a href="orders.html"><i class="fas fa-list"></i> My Orders</a>
+            <div class="profile-btn" onclick="window.location.href='usersaved.html'">
+                <img src="assets/userr.jpg" alt="User Profile">
+                <span>Profile</span>
+            </div>
+        </div>
+    </header>
+    
+    <div class="container">
+        <h1>Print Your Documents Easily</h1>
+        <p>Upload your document and we'll find the nearest print shop for you</p>
+        
+        <div class="upload-section">
+            <h2>Upload Your Document</h2>
+            <div id="uploadArea" class="upload-area">
+                <p>Drag & drop your file here or click to browse</p>
+                <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" style="display:none;">
+                <img id="documentPreview" class="document-preview hidden" alt="Document preview">
+            </div>
+            <button id="uploadBtn" class="btn">Upload Document</button>
+        </div>
+        
+        <div id="printingOptions" class="printing-options hidden">
+            <h2>Printing Options</h2>
+            
+            <div class="option-group">
+                <h3>Paper Size</h3>
+                <div class="radio-group">
+                    <label class="radio-option">
+                        <input type="radio" name="paperSize" value="A4" checked>
+                        <span class="option-label">A4 (210 × 297 mm)</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="paperSize" value="Letter">
+                        <span class="option-label">Letter (8.5 × 11 in)</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="paperSize" value="Legal">
+                        <span class="option-label">Legal (8.5 × 14 in)</span>
+                    </label>
+                </div>
+            </div>
+            
+            <div class="option-group">
+                <h3>Print Type</h3>
+                <div class="radio-group">
+                    <label class="radio-option">
+                        <input type="radio" name="printType" value="black-white" checked>
+                        <span class="option-label">Black & White</span>
+                        <span class="option-price">₱5/page</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="printType" value="colored">
+                        <span class="option-label">Colored</span>
+                        <span class="option-price">₱10/page</span>
+                    </label>
+                </div>
+            </div>
+            
+            <div class="option-group">
+                <h3>Additional Options</h3>
+                <div class="checkbox-group">
+                    <label class="checkbox-option">
+                        <input type="checkbox" name="doubleSided">
+                        <span class="option-label">Double-sided printing</span>
+                        <span class="option-price">+₱5/page</span>
+                    </label>
+                    <label class="checkbox-option">
+                        <input type="checkbox" name="stapled">
+                        <span class="option-label">Stapled</span>
+                        <span class="option-price">+₱3</span>
+                    </label>
+                    <label class="checkbox-option">
+                        <input type="checkbox" name="holePunched">
+                        <span class="option-label">Hole-punched</span>
+                        <span class="option-price">+₱3</span>
+                    </label>
+                </div>
+            </div>
+            
+            <div class="option-group">
+                <h3>Payment Method</h3>
+                <div class="radio-group">
+                    <label class="radio-option">
+                        <input type="radio" name="paymentMethod" value="gcash" checked>
+                        <span class="option-label">GCash</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="paymentMethod" value="Bank Transfer">
+                        <span class="option-label">Bank Transfer</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="paymentMethod" value="cash">
+                        <span class="option-label">Cash on Pickup</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="option-group">
+                <h3>Copies</h3>
+                <input
+                    type="number"
+                    id="copiesInput"
+                    name="copies"
+                    min="1"
+                    value="1"
+                    class="copies-input"
+                >
+            </div>
+            
+            <button id="findShopsBtn" class="btn">Find Nearest Print Shops</button>
+        </div>
+        
+        <div id="locationSection" class="hidden">
+            <h2>Allow location access to find nearest shops</h2>
+            <p>We need your location to find the closest print shops to you.</p>
+            <button id="allowLocationBtn" class="btn">Allow Location Access</button>
+            <div id="locationError"></div>
+        </div>
+        
+        <!-- Map Container -->
+        <div class="map-container">
+            <div id="map">
+                <div class="map-loading">
+                    <p>Loading map...</p>
+                </div>
+            </div>
+            <div class="search-box">
+                <input id="pac-input" class="controls" type="text" placeholder="Search for a location">
+            </div>
+        </div>
+
+        <div id="shopsSection" class="hidden">
+            <h2>Nearby Print Shops</h2>
+            <p>Select a shop to send your print job to:</p>
+            <div id="shopConfirmation"></div>
+            <div id="printShops" class="print-shops">
+                <!-- Shop cards will be inserted here by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Google Maps API -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAHwI-laof9pFodmAMQ_QwUYJium-c7TiQ&libraries=places&callback=initMap" async defer></script>
+    
+    <script>
+        // Global variables
+        let map;
+        let markers = [];
+        let currentPosition = null;
+        let currentFile = null;
+        let infoWindow = null;
+        
+        // DOM elements
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const documentPreview = document.getElementById('documentPreview');
+        const printingOptions = document.getElementById('printingOptions');
+        const findShopsBtn = document.getElementById('findShopsBtn');
+        const locationSection = document.getElementById('locationSection');
+        const allowLocationBtn = document.getElementById('allowLocationBtn');
+        const shopsSection = document.getElementById('shopsSection');
+        const printShopsContainer = document.getElementById('printShops');
+        const copiesInput = document.getElementById('copiesInput');
+        
+        // Sample print shop data with Philippine locations
+        const printShops = [
+            {
+                id: 1,
+                name: "Yoyen Print Gallery",
+                address: "Zone 3, La Paz, Iloilo City, 5000 Iloilo",
+                phone: "Phone Number",
+                hours: "Open 24/7",
+                distance: "4.9 km away",
+                coordinates: { lat: 10.7150, lng: 122.5677 }
+            },
+            {
+                id: 2,
+                name: "photoPrints Iloilo",
+                address: "Zone 11, Villa Arevalo District, Iloilo City, 5000 Iloilo",
+                phone: "09817644250",
+                hours: "Mon-Fri: 7am-8:30pm, Sat-Sun: 7:30am-8pm",
+                distance: "5.6.2 km away",
+                coordinates: { lat: 10.6829, lng: 122.5226 }
+            },
+            {
+                id: 3,
+                name: "Jeric Dave Copy Center (Magdalo)",
+                address: "Magdalo St., Brgy. La Paz, Iloilo City, 5000 Iloilo, Philippines",
+                phone: "0927-180-3793",
+                hours: "Mon-Sat: 9am-5pm",
+                distance: "2.4 km away",
+                coordinates: { lat: 10.71111, lng: 122.56739 }
+            },
+            {
+                id: 4,
+                name: "EZRA Print Copy Scan and Laminate",
+                address: "MONICA, Iloilo City, 5000 Iloilo",
+                phone: "09462187185",
+                hours: "Mon-Sat: 7:30am-9:30pm",
+                distance: "1.2 km away",
+                coordinates: { lat: 10.7117, lng: 122.5453 }
+            },
+            {
+                id: 5,
+                name: "Ryelle21 Photocopy & Printing Services",
+                address: "Zone 1 Mission Rd, Jaro, Iloilo City, 5000 Iloilo",
+                phone: "09103622663",
+                hours: "Mon-Sat: 7:30am-8pm",
+                distance: "3.1 km away",
+                coordinates: { lat: 10.71423, lng: 122.56019 }
+            }
+            
+        ];
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeEventListeners();
+            
+            // Check if there's a previously uploaded file
+            const savedFile = getFileFromStorage();
+            if (savedFile) {
+                // Simulate file selection
+                currentFile = savedFile;
+                updateUIForFile(savedFile);
+            }
+            
+            // Initialize map after Google Maps API is loaded
+            if (typeof google !== 'undefined' && google.maps) {
+                initMap();
+            } else {
+                window.initMap = initMap;
+            }
+        });
+
+        function initializeEventListeners() {
+            // File upload events
+            uploadArea.addEventListener('click', (e) => {
+                if (!e.target.closest('button')) fileInput.click();
+            });
+            
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.style.backgroundColor = '#f0f8ff';
+            });
+            
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.style.backgroundColor = '';
+            });
+            
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.style.backgroundColor = '';
+                if (e.dataTransfer.files.length) {
+                    handleFileSelection(e.dataTransfer.files[0]);
+                }
+            });
+
+            fileInput.addEventListener('change', () => {
+                if (fileInput.files.length) {
+                    handleFileSelection(fileInput.files[0]);
+                }
+            });
+
+            uploadBtn.addEventListener('click', () => {
+                if (currentFile) {
+                    printingOptions.classList.remove('hidden');
+                    uploadBtn.textContent = 'Change Document';
+                } else {
+                    fileInput.click();
+                }
+            });
+
+            findShopsBtn.addEventListener('click', () => {
+                locationSection.classList.remove('hidden');
+            });
+
+            allowLocationBtn.addEventListener('click', () => {
+                requestLocationAccess();
+            });
+            
+            // Initialize map when the page loads
+            initMap();
+        }
+
+        // Location functions
+        function requestLocationAccess() {
+            if (!navigator.geolocation) {
+                showError('Geolocation is not supported by your browser.');
+                return;
+            }
+
+            // Update button state
+            allowLocationBtn.disabled = true;
+            allowLocationBtn.innerHTML = '<span class="spinner"></span> Detecting Location...';
+            
+            // Clear any previous errors
+            clearError();
+            
+            // Set a timeout for location detection
+            const locationTimeout = setTimeout(() => {
+                showError('Location detection is taking too long. Please try again.');
+                resetLocationButton();
+            }, 15000);
+            
+            // Try to get current position
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    clearTimeout(locationTimeout);
+                    handleLocationSuccess(position);
+                },
+                (error) => {
+                    clearTimeout(locationTimeout);
+                    handleLocationError(error);
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0
+                }
+            );
+        }
+
+        function handleLocationSuccess(position) {
+            currentPosition = {
+                lat: position.coords.latitude,
+                lng: position.coords.longitude
+            };
+            
+            // Update map with user's location
+            updateMapWithUserLocation(currentPosition);
+            
+            // Show shops section
+            locationSection.classList.add('hidden');
+            shopsSection.classList.remove('hidden');
+            
+            // Reset button
+            resetLocationButton();
+        }
+
+        function handleLocationError(error) {
+            let errorMessage = 'Unable to retrieve your location';
+            switch(error.code) {
+                case error.PERMISSION_DENIED:
+                    errorMessage = 'Location access was denied. Please enable location services and try again.';
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    errorMessage = 'Location information is unavailable. Please check your connection.';
+                    break;
+                case error.TIMEOUT:
+                    errorMessage = 'The request to get your location timed out. Please try again.';
+                    break;
+            }
+            
+            showError(errorMessage);
+            resetLocationButton();
+        }
+
+        function resetLocationButton() {
+            allowLocationBtn.disabled = false;
+            allowLocationBtn.innerHTML = 'Allow Location Access';
+        }
+
+        function showError(message) {
+            clearError();
+            const errorElement = document.createElement('div');
+            errorElement.id = 'locationError';
+            errorElement.style.color = '#dc3545';
+            errorElement.style.marginTop = '10px';
+            errorElement.style.padding = '10px';
+            errorElement.style.borderRadius = '4px';
+            errorElement.style.backgroundColor = '#f8d7da';
+            errorElement.style.border = '1px solid #f5c6cb';
+            errorElement.textContent = message;
+            
+            locationSection.appendChild(errorElement);
+        }
+
+        function clearError() {
+            const errorElement = document.getElementById('locationError');
+            if (errorElement) {
+                errorElement.remove();
+            }
+        }
+
+        // File handling functions
+        function handleFileSelection(file) {
+            if (!file) return;
+            
+            const validTypes = [
+                'application/pdf',
+                'application/msword',
+                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                'image/jpeg',
+                'image/png'
+            ];
+
+            if (!validTypes.includes(file.type) && !file.name.match(/\.(pdf|doc|docx|jpg|jpeg|png)$/i)) {
+                alert('Please select a valid file type (PDF, DOC, DOCX, JPG, PNG)');
+                return;
+            }
+
+            currentFile = file;
+            
+            // Show preview if it's an image
+            if (file.type.match('image.*')) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    documentPreview.src = e.target.result;
+                    documentPreview.classList.remove('hidden');
+                    // Save file info to localStorage
+                    saveFileToStorage({
+                        name: file.name,
+                        type: file.type,
+                        data: e.target.result,
+                        isImage: true,
+                        lastModified: file.lastModified
+                    });
+                };
+                reader.readAsDataURL(file);
+            } else {
+                documentPreview.classList.add('hidden');
+                documentPreview.src = '';
+                // Save file info to localStorage
+                saveFileToStorage({
+                    name: file.name,
+                    type: file.type,
+                    isImage: false,
+                    lastModified: file.lastModified
+                });
+            }
+
+            updateUIForFile(file);
+        }
+
+        function updateUIForFile(file) {
+            uploadArea.innerHTML = `
+                <p>Selected: ${file.name}</p>
+                <button type="button" id="changeFileBtn" class="btn" style="margin-top:10px; background-color: #6c757d;">Change Document</button>
+            `;
+            uploadBtn.textContent = 'Continue to Printing Options';
+            printingOptions.classList.remove('hidden');
+
+            // Add event listener for changing file
+            const changeBtn = document.getElementById('changeFileBtn');
+            if (changeBtn) {
+                changeBtn.onclick = () => {
+                    resetUploadArea();
+                    fileInput.value = '';
+                    currentFile = null;
+                    clearFileFromStorage();
+                    uploadBtn.textContent = 'Upload Document';
+                    printingOptions.classList.add('hidden');
+                };
+            }
+        }
+
+        function resetUploadArea() {
+            uploadArea.innerHTML = `
+                <p>Drag & drop your file here or click to browse</p>
+                <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" style="display:none;">
+                <img id="documentPreview" class="document-preview hidden" alt="Document preview">
+            `;
+            // Re-bind file input
+            const newFileInput = uploadArea.querySelector('#fileInput');
+            newFileInput.addEventListener('change', () => {
+                if (newFileInput.files.length) {
+                    handleFileSelection(newFileInput.files[0]);
+                }
+            });
+        }
+
+        // Storage functions
+        function saveFileToStorage(fileInfo) {
+            localStorage.setItem('lastUploadedFile', JSON.stringify(fileInfo));
+        }
+
+        function getFileFromStorage() {
+            const fileInfo = localStorage.getItem('lastUploadedFile');
+            return fileInfo ? JSON.parse(fileInfo) : null;
+        }
+
+        function clearFileFromStorage() {
+            localStorage.removeItem('lastUploadedFile');
+        }
+
+        // Map functions
+        function initMap() {
+            try {
+                const mapElement = document.getElementById("map");
+                if (!mapElement) {
+                    throw new Error('Map element not found');
+                }
+
+                // Hide loading message
+                const loadingElement = document.querySelector('.map-loading');
+                if (loadingElement) {
+                    loadingElement.style.display = 'none';
+                }
+
+                // Default to Iloilo City coordinates
+                const iloilo = { lat: 10.7202, lng: 122.5621 };
+                
+                // Create the map
+                map = new google.maps.Map(mapElement, {
+                    zoom: 14,
+                    center: iloilo,
+                    mapTypeControl: false,
+                    streetViewControl: false,
+                    fullscreenControl: true,
+                    zoomControl: true,
+                    mapTypeId: 'roadmap',
+                    styles: [
+                        {
+                            featureType: "poi",
+                            elementType: "labels",
+                            stylers: [{ visibility: "off" }]
+                        }
+                    ]
+                });
+                
+                // Initialize search box
+                initSearchBox();
+                
+                // Add markers for print shops
+                addPrintShopMarkers();
+                
+            } catch (error) {
+                console.error('Error initializing map:', error);
+                showMapError('Failed to load the map. Please try again.');
+            }
+        }
+
+        function initSearchBox() {
+            const input = document.getElementById("pac-input");
+            if (!input) return;
+            
+            const searchBox = new google.maps.places.SearchBox(input);
+            
+            // Bias the SearchBox results towards current map's viewport
+            map.addListener("bounds_changed", () => {
+                searchBox.setBounds(map.getBounds());
+            });
+            
+            // Listen for the event fired when the user selects a prediction
+            searchBox.addListener('places_changed', function() {
+                const places = searchBox.getPlaces();
+                
+                if (places.length === 0) {
+                    return;
+                }
+                
+                // Clear existing markers except user location
+                clearMarkers();
+                
+                // For each place, get the location
+                const bounds = new google.maps.LatLngBounds();
+                
+                places.forEach(place => {
+                    if (!place.geometry || !place.geometry.location) {
+                        console.log("Returned place contains no geometry");
+                        return;
+                    }
+                    
+                    // Create a marker for the searched location
+                    const marker = new google.maps.Marker({
+                        map: map,
+                        title: place.name,
+                        position: place.geometry.location,
+                        icon: {
+                            url: 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png'
+                        }
+                    });
+                    
+                    markers.push(marker);
+                    
+                    if (place.geometry.viewport) {
+                        bounds.union(place.geometry.viewport);
+                    } else {
+                        bounds.extend(place.geometry.location);
+                    }
+                });
+                
+                // Fit the map to the bounds of the selected place
+                map.fitBounds(bounds);
+                
+                // Re-add print shop markers after a short delay
+                setTimeout(() => {
+                    addPrintShopMarkers();
+                }, 500);
+            });
+        }
+
+        function updateMapWithUserLocation(position) {
+            if (!map) return;
+            
+            // Center map on user's location
+            map.setCenter(position);
+            map.setZoom(15);
+            
+            // Clear existing markers
+            clearMarkers();
+            
+            // Add user location marker
+            const userMarker = new google.maps.Marker({
+                position: position,
+                map: map,
+                title: "Your Location",
+                icon: {
+                    url: 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png',
+                    scaledSize: new google.maps.Size(40, 40)
+                }
+            });
+            
+            markers.push(userMarker);
+            
+            // Update print shop markers based on user location
+            updatePrintShopMarkers(position);
+        }
+
+        function addPrintShopMarkers() {
+            if (!map) return;
+            
+            // Create info window to be reused
+            infoWindow = new google.maps.InfoWindow();
+            
+            // Add markers for each print shop
+            printShops.forEach(shop => {
+                const marker = new google.maps.Marker({
+                    position: shop.coordinates,
+                    map: map,
+                    title: shop.name,
+                    icon: {
+                        path: google.maps.SymbolPath.CIRCLE,
+                        fillColor: '#e74c3c',
+                        fillOpacity: 1,
+                        strokeColor: 'white',
+                        strokeWeight: 2,
+                        scale: 10
+                    },
+                    zIndex: 1
+                });
+
+                // Add custom class for styling
+                google.maps.event.addListener(marker, 'domready', () => {
+                    const markerElement = document.querySelector(`[title="${shop.name}"]`);
+                    if (markerElement) {
+                        markerElement.classList.add('print-shop-marker');
+                    }
+                });
+                
+                // Create content for the info window
+                const content = `
+                    <div class="info-window">
+                        <div class="info-window-header">
+                            <h3>${shop.name}</h3>
+                        </div>
+                        <div class="info-window-content">
+                            <div class="info-item">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span>${shop.address}</span>
+                            </div>
+                            <div class="info-item">
+                                <i class="fas fa-phone"></i>
+                                <span>${shop.phone}</span>
+                            </div>
+                            <div class="info-item">
+                                <i class="far fa-clock"></i>
+                                <span>${shop.hours}</span>
+                            </div>
+                            <div class="info-distance">
+                                <i class="fas fa-walking"></i>
+                                <span>${shop.distance}</span>
+                            </div>
+                        </div>
+                        <div class="info-window-footer">
+                            <button class="select-shop" onclick="selectShop(${shop.id})">
+                                <i class="fas fa-check-circle"></i> Select This Shop
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                // Add click event to show info window
+                marker.addListener('click', () => {
+                    infoWindow.setContent(content);
+                    infoWindow.open(map, marker);
+                });
+                
+                // Add to markers array
+                markers.push(marker);
+            });
+        }
+
+        function updatePrintShopMarkers(userPosition) {
+            // Sort shops by distance from user
+            sortShopsByDistance(userPosition);
+            
+            // Update the shops list in the UI
+            displayShops();
+            
+            // Clear existing shop markers
+            markers = markers.filter(marker => marker.getTitle() === 'Your Location');
+            
+            // Re-add print shop markers with updated distances
+            addPrintShopMarkers();
+        }
+
+        function sortShopsByDistance(userPosition) {
+            printShops.forEach(shop => {
+                const distance = calculateDistance(
+                    userPosition.lat, 
+                    userPosition.lng, 
+                    shop.coordinates.lat, 
+                    shop.coordinates.lng
+                );
+                shop.distanceValue = distance; // Store the actual distance
+                shop.distance = distance < 1 
+                    ? `${Math.round(distance * 1000)} meters away` 
+                    : `${distance.toFixed(1)} km away`;
+            });
+            
+            // Sort shops by distance
+            printShops.sort((a, b) => a.distanceValue - b.distanceValue);
+        }
+
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            // Haversine formula to calculate distance between two points
+            const R = 6371; // Earth's radius in km
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = 
+                Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+                Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c; // Distance in km
+        }
+
+        function displayShops() {
+            printShopsContainer.innerHTML = '';
+            
+            printShops.forEach(shop => {
+                const shopElement = document.createElement('div');
+                shopElement.className = 'shop-card';
+                shopElement.innerHTML = `
+                    <h3>${shop.name}</h3>
+                    <p>${shop.address}</p>
+                    <p>${shop.distance}</p>
+                    <p>${shop.hours}</p>
+                    <button onclick="selectShop(${shop.id})" class="btn">Select Shop</button>
+                `;
+                printShopsContainer.appendChild(shopElement);
+            });
+        }
+
+        function clearMarkers() {
+            markers.forEach(marker => {
+                marker.setMap(null);
+            });
+            markers = [];
+        }
+
+        function showMapError(message) {
+            const mapElement = document.getElementById("map");
+            if (mapElement) {
+                mapElement.innerHTML = `
+                    <div class="map-error" style="padding: 20px; color: #721c24; background-color: #f8d7da; border: 1px solid #f5c6cb; border-radius: 4px; text-align: center;">
+                        <h3>Map Loading Error</h3>
+                        <p>${message}</p>
+                        <button onclick="window.location.reload()" style="margin-top: 10px; padding: 5px 15px; background-color: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                            Reload Map
+                        </button>
+                    </div>`;
+            }
+        }
+
+        // Global function for shop selection
+        function selectShop(shopId) {
+            // Get all selected options
+            const paperSize = document.querySelector('input[name="paperSize"]:checked').value;
+            const printType = document.querySelector('input[name="printType"]:checked').value;
+            const isDoubleSided = document.querySelector('input[name="doubleSided"]').checked;
+            const isStapled = document.querySelector('input[name="stapled"]').checked;
+            const isHolePunched = document.querySelector('input[name="holePunched"]').checked;
+            const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+            const copies = document.getElementById('copiesInput')?.value || '1';
+            
+            // Create URL with all parameters
+            const params = new URLSearchParams({
+                id: shopId,
+                paperSize,
+                printType,
+                doubleSided: isDoubleSided,
+                stapled: isStapled,
+                holePunched: isHolePunched,
+                paymentMethod,
+                copies
+            });
+            
+            // Redirect to shop details with all parameters
+            window.location.href = `shop-details.html?${params.toString()}`;
+        }
+
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            if (map) {
+                google.maps.event.trigger(map, 'resize');
+            }
+        });
+    </script>
+</body>
+</html>

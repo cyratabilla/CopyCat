@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shop Details - CopyCat</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Header Styles */
+        .shop-details-page header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 80px;
+        }
+        
+        .shop-details-page .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+            text-decoration: none;
+            transition: opacity 0.2s ease;
+        }
+        
+        .shop-details-page .logo:hover {
+            opacity: 0.8;
+        }
+        
+        @media (max-width: 992px) {
+            .shop-details-page .main-nav,
+            .shop-details-page .user-actions {
+                display: none;
+            }
+            
+            .shop-details-page .mobile-menu-btn {
+                display: block;
+            }
+            
+            .shop-details-page .header-container {
+                padding: 0 15px;
+            }
+        }
+        
+        /* Shop Details Specific Styles */
+        .shop-details-page .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .shop-details-page .back-button {
+            display: inline-flex;
+            align-items: center;
+            margin-bottom: 20px;
+            color: #007bff;
+            text-decoration: none;
+            font-size: 16px;
+            transition: color 0.2s ease;
+        }
+        
+        .shop-details-page .back-button:hover {
+            color: #0056b3;
+            text-decoration: underline;
+        }
+        
+        .shop-details-page .back-button i {
+            margin-right: 8px;
+            font-size: 14px;
+        }
+        
+        .shop-details-page .shop-details-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            margin: 30px 0;
+        }
+        
+        .shop-details-page .shop-info {
+            flex: 1;
+            min-width: 300px;
+        }
+        
+        .shop-details-page .shop-header {
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .shop-details-page .shop-header h1 {
+            margin: 0 0 12px 0;
+            color: #2c3e50;
+            font-size: 28px;
+            font-weight: 600;
+        }
+        
+        .shop-details-page .shop-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px 25px;
+            color: #6c757d;
+            margin: 15px 0;
+            font-size: 14px;
+        }
+        
+        .shop-details-page .shop-meta div {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .shop-details-page .shop-meta i {
+            color: #6c757d;
+            width: 16px;
+            text-align: center;
+        }
+        
+        .shop-details-page .shop-description {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 25px 0;
+            border-left: 4px solid #007bff;
+        }
+        
+        .shop-details-page .shop-services h3, 
+        .shop-details-page .order-summary h3 {
+            margin: 0 0 15px 0;
+            color: #2c3e50;
+            font-size: 18px;
+            font-weight: 600;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eee;
+        }
+        
+        .shop-details-page .service-item, 
+        .shop-details-page .summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+            align-items: center;
+        }
+        
+        .shop-details-page .service-item:last-child, 
+        .shop-details-page .summary-item:last-child {
+            border-bottom: none;
+        }
+        
+        .shop-details-page .service-name, 
+        .shop-details-page .summary-label {
+            font-weight: 500;
+            color: #495057;
+        }
+        
+        .shop-details-page .service-price, 
+        .shop-details-page .summary-value {
+            font-weight: 600;
+            color: #212529;
+        }
+        
+        .shop-details-page .order-summary {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 30px 0;
+            border: 1px solid #e9ecef;
+        }
+        
+        .shop-details-page .total {
+            display: flex;
+            justify-content: space-between;
+            font-size: 1.2em;
+            font-weight: 700;
+            color: #28a745;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 2px solid #e9ecef;
+        }
+        
+        .shop-details-page .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin: 35px 0 20px;
+            flex-wrap: wrap;
+        }
+        
+        .shop-details-page .btn {
+            padding: 12px 28px;
+            border: none;
+            border-radius: 6px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.25s ease;
+            text-decoration: none;
+        }
+        
+        .shop-details-page .btn i {
+            font-size: 14px;
+        }
+        
+        .shop-details-page .btn-primary {
+            background-color: #007bff;
+            color: white;
+            box-shadow: 0 2px 8px rgba(0, 123, 255, 0.3);
+        }
+        
+        .shop-details-page .btn-outline {
+            background-color: transparent;
+            border: 1px solid #dee2e6;
+            color: #495057;
+        }
+        
+        .shop-details-page .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .shop-details-page .btn-primary:hover {
+            background-color: #0069d9;
+        }
+        
+        .shop-details-page .btn-outline:hover {
+            border-color: #adb5bd;
+            color: #212529;
+        }
+        
+        .shop-details-page .shop-map {
+            flex: 1;
+            min-width: 300px;
+            height: 500px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e9ecef;
+        }
+        
+        /* Responsive Styles */
+        @media (max-width: 992px) {
+            .shop-details-page .shop-details-container {
+                gap: 20px;
+            }
+            
+            .shop-details-page .shop-map {
+                height: 400px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .shop-details-page .shop-header h1 {
+                font-size: 24px;
+            }
+            
+            .shop-details-page .shop-meta {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .shop-details-page .action-buttons {
+                flex-direction: column;
+                gap: 12px;
+            }
+            
+            .shop-details-page .btn {
+                width: 100%;
+                padding: 14px 20px;
+            }
+            
+            .shop-details-page .shop-map {
+                height: 350px;
+                min-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body class="shop-details-page">
+    <header>
+        <a href="index.html" class="logo">CopyCat</a>
+    </header>
+    
+    <div class="container">
+        <a href="print.html" class="back-button">
+            <i class="fas fa-arrow-left"></i> Back to Print Shops
+        </a>
+        
+        <div class="shop-details-container">
+            <div class="shop-info">
+                <div class="shop-header">
+                    <h1 id="shopName">Loading shop details...</h1>
+                    <div class="shop-meta">
+                        <div><i class="fas fa-map-marker-alt"></i> <span id="shopDistance">--</span></div>
+                        <div><i class="fas fa-phone"></i> <span id="shopPhone">--</span></div>
+                        <div><i class="far fa-clock"></i> <span id="shopHours">--</span></div>
+                    </div>
+                </div>
+                
+                <div class="shop-description">
+                    <p id="shopAddress">Loading address...</p>
+                </div>
+                
+                <div class="shop-services">
+                    <h3>Your Order Details</h3>
+                    <div class="service-item">
+                        <span class="service-name">Paper Size:</span>
+                        <span class="service-price" id="orderPaperSize">A4</span>
+                    </div>
+                    <div class="service-item">
+                        <span class="service-name">Print Type:</span>
+                        <span class="service-price" id="orderPrintType">Black & White</span>
+                    </div>
+                    <div class="service-item">
+                        <span class="service-name">Double-sided:</span>
+                        <span class="service-price" id="orderDoubleSided">No</span>
+                    </div>
+                    <div class="service-item">
+                        <span class="service-name">Stapled:</span>
+                        <span class="service-price" id="orderStapled">No</span>
+                    </div>
+                    <div class="service-item">
+                        <span class="service-name">Hole-punched:</span>
+                        <span class="service-price" id="orderHolePunched">No</span>
+                    </div>
+                    <div class="service-item">
+                        <span class="service-name">Copies:</span>
+                        <span class="service-price" id="orderCopies">1</span>
+                    </div>
+                    <div class="service-item">
+                        <span class="service-name">Payment Method:</span>
+                        <span class="service-price" id="orderPayment">--</span>
+                    </div>
+                </div>
+                
+                <div class="order-summary">
+                    <h3>Order Summary</h3>
+                    <div class="summary-item">
+                        <span class="summary-label">Subtotal:</span>
+                        <span class="summary-value" id="subtotal">₱0.00</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Additional Services:</span>
+                        <span class="summary-value" id="additionalServices">₱0.00</span>
+                    </div>
+                    <div class="total">
+                        <span>Total:</span>
+                        <span id="totalAmount">₱0.00</span>
+                    </div>
+                </div>
+                
+                <div class="action-buttons">
+                    <button class="btn btn-primary" id="confirmOrderBtn">
+                        <i class="fas fa-check-circle"></i> Confirm Order
+                    </button>
+                    <button class="btn btn-outline" onclick="window.history.back()">
+                        <i class="fas fa-arrow-left"></i> Back
+                    </button>
+                </div>
+            </div>
+            
+            <div class="shop-map" id="shopMap">
+                <!-- Map will be loaded here -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script>
+        // Get URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const shopId = urlParams.get('id');
+        
+        // Sample shop data (in a real app, this would come from your database)
+        const shops = [
+            {
+                id: 1,
+                name: "Yoyen Print Gallery",
+                address: "Zone 3, La Paz, Iloilo City, 5000 Iloilo",
+                phone: "Phone Number",
+                hours: "Open 24/7",
+                distance: "4.9 km away",
+                coordinates: { lat: 10.7150, lng: 122.5677 }
+            },
+            {
+                id: 2,
+                name: "photoPrints Iloilo",
+                address: "Zone 11, Villa Arevalo District, Iloilo City, 5000 Iloilo",
+                phone: "09817644250",
+                hours: "Mon-Fri: 7am-8:30pm, Sat-Sun: 7:30am-8pm",
+                distance: "5.6 km away",
+                coordinates: { lat: 10.6829, lng: 122.5226 }
+            },
+            {
+                id: 3,
+                name: "Jeric Dave Copy Center (Magdalo)",
+                address: "Magdalo St., Brgy. La Paz, Iloilo City, 5000 Iloilo, Philippines",
+                phone: "0927-180-3793",
+                hours: "Mon-Sat: 9am-5pm",
+                distance: "2.4 km away",
+                coordinates: { lat: 10.71111, lng: 122.56739 }
+            },
+            {
+                id: 4,
+                name: "EZRA Print Copy Scan and Laminate",
+                address: "MONICA, Iloilo City, 5000 Iloilo",
+                phone: "09462187185",
+                hours: "Mon-Sat: 7:30am-9:30pm",
+                distance: "1.2 km away",
+                coordinates: { lat: 10.7117, lng: 122.5453 }
+            },
+            {
+                id: 5,
+                name: "Ryelle21 Photocopy & Printing Services",
+                address: "Zone 1 Mission Rd, Jaro, Iloilo City, 5000 Iloilo",
+                phone: "09103622663",
+                hours: "Mon-Sat: 7:30am-8pm",
+                distance: "3.1 km away",
+                coordinates: { lat: 10.71423, lng: 122.56019 }
+            }
+        ];
+        
+        // Find the selected shop
+        const selectedShop = shops.find(shop => shop.id === parseInt(shopId));
+        
+        // Update the page with shop details
+        function updateShopDetails() {
+            if (!selectedShop) {
+                document.getElementById('shopName').textContent = 'Shop not found';
+                return;
+            }
+            
+            // Update shop info
+            document.getElementById('shopName').textContent = selectedShop.name;
+            document.getElementById('shopAddress').textContent = selectedShop.address;
+            document.getElementById('shopPhone').textContent = selectedShop.phone || 'Not available';
+            document.getElementById('shopHours').textContent = selectedShop.hours || 'Hours not specified';
+            document.getElementById('shopDistance').textContent = selectedShop.distance || '--';
+            
+            // Update order details from URL parameters
+            document.getElementById('orderPaperSize').textContent = urlParams.get('paperSize') || 'A4';
+            document.getElementById('orderPrintType').textContent = 
+                (urlParams.get('printType') === 'colored' ? 'Colored' : 'Black & White');
+            document.getElementById('orderDoubleSided').textContent = 
+                urlParams.get('doubleSided') === 'true' ? 'Yes' : 'No';
+            document.getElementById('orderStapled').textContent = 
+                urlParams.get('stapled') === 'true' ? 'Yes' : 'No';
+            document.getElementById('orderHolePunched').textContent = 
+                urlParams.get('holePunched') === 'true' ? 'Yes' : 'No';
+            document.getElementById('orderCopies').textContent = urlParams.get('copies') || '1';
+            
+            // Format payment method
+            const paymentMethod = urlParams.get('paymentMethod') || 'cash';
+            let paymentText = 'Cash on Pickup';
+            if (paymentMethod === 'gcash') paymentText = 'GCash';
+            else if (paymentMethod === 'bank') paymentText = 'Bank Transfer';
+            document.getElementById('orderPayment').textContent = paymentText;
+            
+            // Calculate and update prices
+            updateOrderSummary();
+        }
+        
+        // Calculate and update the order summary
+        function updateOrderSummary() {
+            const copies = parseInt(urlParams.get('copies') || '1');
+            const isColored = urlParams.get('printType') === 'colored';
+            const isDoubleSided = urlParams.get('doubleSided') === 'true';
+            const isStapled = urlParams.get('stapled') === 'true';
+            const isHolePunched = urlParams.get('holePunched') === 'true';
+            
+            // Base price per page
+            const basePricePerPage = isColored ? 10 : 5;
+            
+            // Calculate subtotal (pages * copies * price per page)
+            const subtotal = copies * basePricePerPage;
+            
+            // Calculate additional services
+            let additionalCost = 0;
+            if (isDoubleSided) additionalCost += 5 * copies;
+            if (isStapled) additionalCost += 3;
+            if (isHolePunched) additionalCost += 3;
+            
+            // Calculate total
+            const total = subtotal + additionalCost;
+            
+            // Update the UI
+            document.getElementById('subtotal').textContent = `₱${subtotal.toFixed(2)}`;
+            document.getElementById('additionalServices').textContent = `₱${additionalCost.toFixed(2)}`;
+            document.getElementById('totalAmount').textContent = `₱${total.toFixed(2)}`;
+        }
+        
+        // Initialize the map
+        function initMap() {
+            if (!selectedShop || !selectedShop.coordinates) return;
+            
+            const map = new google.maps.Map(document.getElementById('shopMap'), {
+                center: selectedShop.coordinates,
+                zoom: 15,
+                mapTypeControl: false,
+                streetViewControl: false,
+                fullscreenControl: true
+            });
+            
+            // Add a marker for the shop
+            new google.maps.Marker({
+                position: selectedShop.coordinates,
+                map: map,
+                title: selectedShop.name,
+                icon: {
+                    url: 'https://maps.google.com/mapfiles/ms/icons/red-dot.png'
+                }
+            });
+        }
+        
+        // Initialize Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyA7zC2xkGU7VZu7iLnSBhv4n8EZnHrzJFw",
+            authDomain: "copycat-d3561.firebaseapp.com",
+            projectId: "copycat-d3561",
+            storageBucket: "copycat-d3561.appspot.com",
+            messagingSenderId: "201940334771",
+            appId: "1:201940334771:web:5d68712667c8a5526a58c6"
+        };
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const auth = firebase.auth();
+
+        // Handle order confirmation
+        document.getElementById('confirmOrderBtn').addEventListener('click', async function() {
+            const confirmBtn = this;
+            const originalText = confirmBtn.innerHTML;
+            
+            try {
+                // Disable button and show loading state
+                confirmBtn.disabled = true;
+                confirmBtn.innerHTML = 'Processing...';
+                
+                // Get current user
+                const user = auth.currentUser;
+                if (!user) {
+                    throw new Error('Please sign in to place an order');
+                }
+
+                // Get order details
+                const orderDetails = {
+                    userId: user.uid,
+                    shopName: selectedShop?.name || 'Print Shop',
+                    shopId: shopId || '',
+                    createdAt: firebase.database.ServerValue.TIMESTAMP,
+                    status: 'Pending',
+                    total: document.getElementById('totalAmount')?.textContent || '₱0.00',
+                    items: [
+                        {
+                            name: 'Print Job',
+                            quantity: document.getElementById('orderCopies')?.textContent || '1',
+                            paperSize: document.getElementById('orderPaperSize')?.textContent || 'A4',
+                            printType: document.getElementById('orderPrintType')?.textContent || 'Black & White',
+                            doubleSided: document.getElementById('orderDoubleSided')?.textContent === 'Yes',
+                            stapled: document.getElementById('orderStapled')?.textContent === 'Yes',
+                            holePunched: document.getElementById('orderHolePunched')?.textContent === 'Yes'
+                        }
+                    ],
+                    paymentMethod: document.getElementById('orderPayment')?.textContent || 'Cash on Pickup',
+                    status: 'Pending',
+                    updatedAt: firebase.database.ServerValue.TIMESTAMP
+                };
+
+                // Save to Firebase under the user's node
+                const userOrdersRef = db.ref(`orders/${user.uid}`);
+                const newOrderRef = userOrdersRef.push();
+                await newOrderRef.set(orderDetails);
+
+                // Show success message and redirect
+                alert('Order confirmed! You will receive a confirmation shortly.');
+                window.location.href = 'orders.html';
+                
+            } catch (error) {
+                console.error('Error placing order:', error);
+                alert(`Failed to place order: ${error.message}`);
+                confirmBtn.disabled = false;
+                confirmBtn.innerHTML = originalText;
+            }
+        });
+        
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            updateShopDetails();
+            
+            // Load Google Maps API
+            const script = document.createElement('script');
+            script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyAHwI-laof9pFodmAMQ_QwUYJium-c7TiQ&callback=initMap`;
+            script.async = true;
+            script.defer = true;
+            document.head.appendChild(script);
+        });
+    </script>
+</body>
+</html>
